@@ -1,0 +1,3 @@
+ready. type 'quit' to exit.
+[OUTPUT] 02 aa bb cc 00 00 00 00 00 00 00 00 00 00 00 00 00
+[FEAT-GET]

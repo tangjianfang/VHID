@@ -1,0 +1,4 @@
+sleep 200
+out aa bb cc
+getf
+quit

@@ -1,0 +1,62 @@
+; vhid.inf — root-enumerated software HID device backed by KMDF + VHF.
+;
+; Install (developer machine, test signing required):
+;   bcdedit /set testsigning on   (admin, then reboot)
+;   devcon install vhid.inf Root\VHID
+;
+; To uninstall:
+;   devcon remove Root\VHID
+;   pnputil /delete-driver oem<n>.inf /uninstall
+
+[Version]
+Signature   = "$WINDOWS NT$"
+Class       = HIDClass
+ClassGuid   = {745A17A0-74D3-11D0-B6FE-00A0C90F57DA}
+Provider    = %ProviderName%
+DriverVer   = 01/01/2026,1.0.0.0
+CatalogFile = vhid.cat
+PnpLockdown = 1
+
+[Manufacturer]
+%ProviderName% = Standard,NTamd64
+
+[Standard.NTamd64]
+%DeviceName% = Vhid_Inst, Root\VHID
+
+[Vhid_Inst.NT]
+CopyFiles = Vhid_CopyFiles
+
+[Vhid_Inst.NT.HW]
+AddReg = Vhid_AddReg
+
+[Vhid_AddReg]
+HKR,,"UpperFilters",0x00010000,"mshidkmdf"
+
+[Vhid_Inst.NT.Services]
+AddService = vhid, 0x00000002, Vhid_Service
+
+[Vhid_Service]
+DisplayName    = %ServiceName%
+ServiceType    = 1   ; SERVICE_KERNEL_DRIVER
+StartType      = 3   ; SERVICE_DEMAND_START
+ErrorControl   = 1   ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\vhid.sys
+
+[Vhid_CopyFiles]
+vhid.sys
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+vhid.sys = 1
+
+[DestinationDirs]
+DefaultDestDir   = 12
+Vhid_CopyFiles   = 12
+
+[Strings]
+ProviderName  = "VHID"
+DeviceName    = "Virtual HID Device (VHID)"
+ServiceName   = "Virtual HID Driver"
+DiskName      = "VHID Installation Disk"

@@ -3,10 +3,11 @@ add_executable(vhid_tests
     src/test_reports.cpp
     src/test_descriptor.cpp
     src/test_in_process_transport.cpp
+    src/test_capture.cpp
 )
 
 target_include_directories(vhid_tests PRIVATE include)
-target_link_libraries(vhid_tests PRIVATE vhid_core vhid_mock)
+target_link_libraries(vhid_tests PRIVATE vhid_core vhid_mock vhid_capture)
 
 add_test(NAME vhid_tests COMMAND vhid_tests)
 

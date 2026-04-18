@@ -18,6 +18,7 @@ Both layers share the same **Report Descriptor** and report (de)serialization co
 - **Named-pipe mock transport** — cross-process binary protocol for integration testing
 - **SDK facade** (`Device`) — simple synchronous API that auto-selects mock or driver transport
 - **Interactive CLI** — hex-based injector for manual testing (`mock-device`, `mock-host`, `driver` modes)
+- **Device capture** — enumerate / monitor real USB HID devices, export full identity + capabilities + raw Report Descriptor as a JSON profile, then replay it as a virtual device
 - **Sample consumer app** — real-world Win32 HID enumeration & I/O example
 - **KMDF + VHF driver scaffold** — kernel-side virtual HID with IOCTL control interface
 
@@ -51,7 +52,8 @@ ctest --test-dir build -C Debug --output-on-failure
 | `vhid_core` | Static lib | Shared report descriptor + POD report types |
 | `vhid_mock` | Static lib | InProcess + NamedPipe mock transports |
 | `vhid_sdk` | Static lib | User-facing Device API (auto-selects transport) |
-| `vhid_cli` | Executable | Interactive HID injector CLI |
+| `vhid_capture` | Static lib | HID enumeration / inspection / Report Descriptor builder |
+| `vhid_cli` | Executable | Interactive HID injector + capture CLI |
 | `vhid_tests` | Executable | Unit test suite |
 | `consumer_app` | Executable | Sample Win32 HID consumer |
 
@@ -68,6 +70,26 @@ ctest --test-dir build -C Debug --output-on-failure
 ```
 
 Commands: `in <hex>` (submit input), `out <hex>` (send output), `getf` (get feature), `setf <hex>` (set feature), `sleep <ms>`, `quit`.
+
+### Capture a real HID device
+
+Snapshot a physical USB HID's identity, capabilities, and raw Report Descriptor into a JSON profile, then start a virtual device that mirrors it:
+
+```powershell
+# List currently-attached HID devices
+.\build\src\cli\Debug\vhid-cli.exe capture list
+
+# Capture device #0 directly
+.\build\src\cli\Debug\vhid-cli.exe capture 0 -o mouse.json
+
+# Or wait for a newly-plugged device (60s timeout)
+.\build\src\cli\Debug\vhid-cli.exe capture watch -o mouse.json
+
+# Spin up a mock device that reports the captured identity
+.\build\src\cli\Debug\vhid-cli.exe mock-device --profile mouse.json
+```
+
+The exported JSON contains VID/PID, manufacturer/product/serial strings, top-level usage page/usage, all input/output/feature report capabilities, and the raw HID Report Descriptor (hex-encoded). When the kernel driver is invoked, the descriptor and identity strings can later be reused verbatim to clone the original device.
 
 ### Smoke test
 
@@ -89,12 +111,14 @@ bcdedit /set testsigning on   # once, then reboot
 src/core/        Report descriptor + report types (shared by all layers)
 src/mock/        IHidTransport interface + InProcess / NamedPipe implementations
 src/sdk/         User-facing Device facade + driver transport stub
-src/cli/         Interactive CLI injector
+src/capture/     HID device enumeration / inspection / Report Descriptor builder
+src/cli/         Interactive CLI injector + capture commands
 tests/           Unit tests (lightweight custom framework)
 samples/         Sample HID consumer app (Win32 API)
 driver/vhid/     KMDF + VHF kernel driver (VS2022 + WDK 11)
 installer/       Install / uninstall / packaging scripts
 scripts/         E2E smoke test
+third_party/     Vendored single-header dependencies (nlohmann/json, MIT)
 ```
 
 ## Architecture

@@ -16,9 +16,15 @@ option(VHID_BUILD_SAMPLES "Build sample apps"    ON)
 
 enable_testing()
 
+# Vendored third-party single-header libraries
+add_library(nlohmann_json INTERFACE)
+target_include_directories(nlohmann_json INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
+
 add_subdirectory(src/core)
 add_subdirectory(src/mock)
 add_subdirectory(src/sdk)
+add_subdirectory(src/capture)
 
 if(VHID_BUILD_CLI)
     add_subdirectory(src/cli)

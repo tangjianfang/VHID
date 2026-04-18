@@ -12,6 +12,7 @@ endif()
 
 option(VHID_BUILD_TESTS   "Build unit tests"     ON)
 option(VHID_BUILD_CLI     "Build CLI tool"       ON)
+option(VHID_BUILD_GUI     "Build Win32 GUI"      ON)
 option(VHID_BUILD_SAMPLES "Build sample apps"    ON)
 
 enable_testing()
@@ -28,6 +29,10 @@ add_subdirectory(src/capture)
 
 if(VHID_BUILD_CLI)
     add_subdirectory(src/cli)
+endif()
+
+if(VHID_BUILD_GUI AND WIN32)
+    add_subdirectory(src/gui)
 endif()
 
 if(VHID_BUILD_TESTS)

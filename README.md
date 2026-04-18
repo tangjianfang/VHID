@@ -18,6 +18,7 @@ Both layers share the same **Report Descriptor** and report (de)serialization co
 - **Named-pipe mock transport** — cross-process binary protocol for integration testing
 - **SDK facade** (`Device`) — simple synchronous API that auto-selects mock or driver transport
 - **Interactive CLI** — hex-based injector for manual testing (`mock-device`, `mock-host`, `driver` modes)
+- **Win32 GUI** — Razer-styled control center for capture / inject / mock-device, no command line needed
 - **Device capture** — enumerate / monitor real USB HID devices, export full identity + capabilities + raw Report Descriptor as a JSON profile, then replay it as a virtual device
 - **Sample consumer app** — real-world Win32 HID enumeration & I/O example
 - **KMDF + VHF driver scaffold** — kernel-side virtual HID with IOCTL control interface
@@ -54,10 +55,22 @@ ctest --test-dir build -C Debug --output-on-failure
 | `vhid_sdk` | Static lib | User-facing Device API (auto-selects transport) |
 | `vhid_capture` | Static lib | HID enumeration / inspection / Report Descriptor builder |
 | `vhid_cli` | Executable | Interactive HID injector + capture CLI |
+| `vhid_gui` | Executable | Razer-styled Win32 GUI dashboard |
 | `vhid_tests` | Executable | Unit test suite |
 | `consumer_app` | Executable | Sample Win32 HID consumer |
 
 ## Usage
+
+### GUI (recommended)
+
+```powershell
+.\build\src\gui\Debug\vhid-gui.exe
+```
+
+Razer-themed single-window dashboard:
+- **DEVICES** — refresh / watch for new HID devices
+- **PROFILE** — view captured profile, save to JSON, load existing JSON
+- **MOCK DEVICE** — start a named-pipe mock device, inject hex Input reports, observe Output / Feature traffic in the live log
 
 ### CLI injector
 
@@ -113,6 +126,7 @@ src/mock/        IHidTransport interface + InProcess / NamedPipe implementations
 src/sdk/         User-facing Device facade + driver transport stub
 src/capture/     HID device enumeration / inspection / Report Descriptor builder
 src/cli/         Interactive CLI injector + capture commands
+src/gui/         Win32 GUI control center (Razer dark theme)
 tests/           Unit tests (lightweight custom framework)
 samples/         Sample HID consumer app (Win32 API)
 driver/vhid/     KMDF + VHF kernel driver (VS2022 + WDK 11)
